@@ -1,0 +1,38 @@
+
+name: Build Lunar Crystal APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Extract project
+        run: |
+          unzip Lunar_Crystal_Theme_Android_Project.zip -d project
+          echo "PROJECT_DIR=$PWD/project" >> $GITHUB_ENV
+
+      - name: Build APK
+        run: gradle -p "$PROJECT_DIR" assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Lunar-Crystal-Theme-APK
+          path: project/app/build/outputs/apk/debug/*.apk
